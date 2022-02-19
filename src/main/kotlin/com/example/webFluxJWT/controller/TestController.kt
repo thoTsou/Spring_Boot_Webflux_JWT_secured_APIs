@@ -21,4 +21,13 @@ class TestController {
     suspend fun giveMessageToUser(): ResponseEntity<Message> =
         ResponseEntity.ok(Message("Content for users only"))
 
+    @GetMapping("/user-read")
+    @PreAuthorize("hasAuthority('user:read')")
+    suspend fun giveMessageToUserWithReadPrivilege(): ResponseEntity<Message> =
+        ResponseEntity.ok(Message("Content for users with privilege user:read"))
+
+    @GetMapping("/user-write")
+    @PreAuthorize("hasAuthority('user:write')")
+    suspend fun giveMessageToUserWithWritePrivilege(): ResponseEntity<Message> =
+        ResponseEntity.ok(Message("Content for users with privilege user:write"))
 }

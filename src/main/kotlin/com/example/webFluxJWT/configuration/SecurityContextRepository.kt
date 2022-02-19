@@ -21,15 +21,18 @@ class SecurityContextRepository(
         throw UnsupportedOperationException("Not supported yet.")
     }
 
-
     override fun load(exchange: ServerWebExchange): Mono<SecurityContext> = mono {
 
-        val authTokenWithBearerPrefix: String = Mono.justOrEmpty(exchange.request.headers.getFirst(HttpHeaders.AUTHORIZATION))
-            .filter { it.startsWith("Bearer ") }.awaitSingle()
+        val authTokenWithBearerPrefix: String? = exchange.request.headers.getFirst(HttpHeaders.AUTHORIZATION)
 
-        val authToken = authTokenWithBearerPrefix.substring(7)
-        val auth = UsernamePasswordAuthenticationToken(authToken, authToken)
+        if(authTokenWithBearerPrefix != null && authTokenWithBearerPrefix.startsWith("Bearer ")) {
 
-        return@mono authenticationManager.authenticate(auth).map { SecurityContextImpl(it) }.awaitSingle()
+            val authToken = authTokenWithBearerPrefix.substring(7)
+            val auth = UsernamePasswordAuthenticationToken(authToken, authToken)
+
+            return@mono authenticationManager.authenticate(auth).map { SecurityContextImpl(it) }.awaitSingle()
+        }else{
+            throw Exception("token not specified")
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.example.webFluxJWT.configuration
 
 
-import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -15,25 +14,23 @@ class AuthenticationManager(
     private val jwtUtil: JWTUtil
 ): ReactiveAuthenticationManager {
 
-    @SuppressWarnings("unchecked")
     override fun authenticate(authentication: Authentication): Mono<Authentication> = mono {
 
         val authToken = authentication.credentials.toString()
         val username = jwtUtil.getUsernameFromToken(authToken)
 
-        return@mono Mono.just(jwtUtil.validateToken(authToken))
-            .filter{valid -> valid}
-            .switchIfEmpty(Mono.empty())
-            .map {
-                val claims = jwtUtil.getAllClaimsFromToken(authToken)
-                val rolesList = claims["role"] as List<String>
+        if (jwtUtil.validateToken(authToken)){
 
-                UsernamePasswordAuthenticationToken(
-                    username,
-                    null,
-                    rolesList.map { SimpleGrantedAuthority(it) }
-                )
-            }
-            .awaitSingle()
+            val claims = jwtUtil.getAllClaimsFromToken(authToken)
+            val rolesANDprivilagesList = claims["rolesANDprivileges"] as List<String>
+
+            return@mono UsernamePasswordAuthenticationToken(
+                username,
+                null,
+                rolesANDprivilagesList.map { SimpleGrantedAuthority(it) }
+            )
+        }else{
+            throw Exception("invalid token")
+        }
     }
 }

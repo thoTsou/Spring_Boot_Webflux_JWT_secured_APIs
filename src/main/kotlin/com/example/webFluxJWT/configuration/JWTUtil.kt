@@ -12,32 +12,32 @@ class JWTUtil(
     private val secretKey: SecretKey
 ) {
 
-    fun getAllClaimsFromToken(token: String): Claims =
+    suspend fun getAllClaimsFromToken(token: String): Claims =
         Jwts.parserBuilder().setSigningKey(secretKey)
             .build().parseClaimsJws(token).body
 
-    fun getUsernameFromToken(token: String): String =
+    suspend fun getUsernameFromToken(token: String): String =
         getAllClaimsFromToken(token).subject
 
-    fun getExpirationDateFromToken(token: String): Date =
+    suspend fun getExpirationDateFromToken(token: String): Date =
         getAllClaimsFromToken(token).expiration
 
-    fun isTokenExpired(token: String): Boolean =
+    suspend fun isTokenExpired(token: String): Boolean =
         getExpirationDateFromToken(token).before(Date())
 
-    fun generateToken(user: User): String {
+    suspend fun generateToken(user: User): String {
 
         val claims: HashMap<String,Any> = hashMapOf()
 
-        claims["role"] = user.roles
+        claims["rolesANDprivileges"] = user.rolesANDprivileges
 
         return doGenerateToken(claims,user.username)
     }
 
-    fun validateToken(token: String) =
+    suspend fun validateToken(token: String) =
         !isTokenExpired(token)
 
-    private fun doGenerateToken(claims: Map<String,Any>, username: String): String{
+    private suspend fun doGenerateToken(claims: Map<String,Any>, username: String): String{
         val expTime: Long = 28800 //in second
         val createdDate = Date()
         val expDAte = Date(createdDate.time + expTime * 1000)
