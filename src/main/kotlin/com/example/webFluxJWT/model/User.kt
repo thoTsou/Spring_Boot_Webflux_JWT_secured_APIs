@@ -12,10 +12,12 @@ class User(
     private val isAccountNonLocked: Boolean = true,
     private val isCredentialsNonExpired: Boolean = true,
     private val isEnabled: Boolean = true,
-    val roles: List<Role>,
+    //val roles: List<Role>,
+    val rolesANDprivileges: List<String>
 ): UserDetails {
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = this.roles.map { SimpleGrantedAuthority(it.name) }.toMutableList()
+    //override fun getAuthorities(): MutableCollection<out GrantedAuthority> = this.roles.map { SimpleGrantedAuthority(it.name) }.toMutableList()
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = this.rolesANDprivileges.map { SimpleGrantedAuthority(it) }.toMutableList()
 
     override fun getPassword(): String = this.password
 
@@ -30,6 +32,6 @@ class User(
     override fun isEnabled(): Boolean = this.isEnabled
 
     override fun toString(): String {
-        return "User(serialVersionUID=$serialVersionUID, username='$username', password='$password', isAccountNonExpired=$isAccountNonExpired, isAccountNonLocked=$isAccountNonLocked, isCredentialsNonExpired=$isCredentialsNonExpired, isEnabled=$isEnabled, roles=$roles)"
+        return "User(serialVersionUID=$serialVersionUID, username='$username', password='$password', isAccountNonExpired=$isAccountNonExpired, isAccountNonLocked=$isAccountNonLocked, isCredentialsNonExpired=$isCredentialsNonExpired, isEnabled=$isEnabled, rolesANDprivileges=$rolesANDprivileges)"
     }
 }

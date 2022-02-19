@@ -16,7 +16,7 @@ class UserService(
     private val passwordEncoder: PasswordEncoder,
 ) {
 
-    suspend fun findUserByUsername(username: String): Mono<User> = mono {
+    suspend fun findUserByUsername(username: String): User? {
 
         val data: HashMap<String, User> = HashMap()
 
@@ -24,17 +24,17 @@ class UserService(
         data["user"] = User(
             username = "user",
             password = passwordEncoder.encode("user"),
-            roles = listOf(Role.ROLE_USER) )
+            rolesANDprivileges = listOf("ROLE_USER","user:read") )
 
         //username:password -> admin:admin
         data["admin"] = User(
             username = "admin",
             password = passwordEncoder.encode("admin"),
-            roles = listOf(Role.ROLE_ADMIN) )
+            rolesANDprivileges = listOf("ROLE_ADMIN") )
 
         // MY LOGGER IS BETTER THAN YOURS AND YOU SHOULD KNOW IT
         //System.out.println(data[username].toString())
 
-        return@mono data[username]
+        return data[username]
     }
 }
