@@ -16,21 +16,36 @@ class AuthenticationManager(
 
     override fun authenticate(authentication: Authentication): Mono<Authentication> = mono {
 
-        val authToken = authentication.credentials.toString()
-        val username = jwtUtil.getUsernameFromToken(authToken)
+        // if AUTHORIZATION header is not specified OR Bearer token is invalid for some reason
+        // jwtUtil.getUsernameFromToken(authToken)
+        // will throw an exception
+        runCatching {
+            val authToken = authentication.credentials.toString()
+            val username = jwtUtil.getUsernameFromToken(authToken)
 
-        if (jwtUtil.validateToken(authToken)){
+            // token is a valid JWT BUT it might have expired
+            if (jwtUtil.hasTokenExpired(authToken)) {
 
-            val claims = jwtUtil.getAllClaimsFromToken(authToken)
-            val rolesANDprivilagesList = claims["rolesANDprivileges"] as List<String>
+                val claims = jwtUtil.getAllClaimsFromToken(authToken)
+                val rolesANDprivilagesList = claims["rolesANDprivileges"] as List<String>
 
+                return@mono UsernamePasswordAuthenticationToken(
+                    username,
+                    null,
+                    rolesANDprivilagesList.map { SimpleGrantedAuthority(it) }
+                )
+            } else {
+                // token has expired
+                throw Exception("token has expired, so we have to somehow tell client to refresh it")
+            }
+        }.getOrElse {
+            // return dum Authentication as AUTHORIZATION header is not specified OR Bearer token is invalid for some reason
+            // we do this in order for the API to respond with 403:Forbidden
             return@mono UsernamePasswordAuthenticationToken(
-                username,
+                "this_is",
                 null,
-                rolesANDprivilagesList.map { SimpleGrantedAuthority(it) }
+                listOf("not_valid").map { SimpleGrantedAuthority(it) }
             )
-        }else{
-            throw Exception("invalid token")
         }
     }
 }

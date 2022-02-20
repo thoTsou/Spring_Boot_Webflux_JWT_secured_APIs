@@ -18,7 +18,7 @@ class SecurityContextRepository(
 ): ServerSecurityContextRepository {
 
     override fun save(exchange: ServerWebExchange, context: SecurityContext): Mono<Void> = mono {
-        throw UnsupportedOperationException("Not supported yet.")
+        throw UnsupportedOperationException("Not supported")
     }
 
     override fun load(exchange: ServerWebExchange): Mono<SecurityContext> = mono {
@@ -32,7 +32,9 @@ class SecurityContextRepository(
 
             return@mono authenticationManager.authenticate(auth).map { SecurityContextImpl(it) }.awaitSingle()
         }else{
-            throw Exception("token not specified")
+            //return dum SecurityContext because AUTHORIZATION HEADER is not specified
+            val dumAuth = UsernamePasswordAuthenticationToken("AUTH_header", "not_specified")
+            return@mono authenticationManager.authenticate(dumAuth).map { SecurityContextImpl(it) }.awaitSingle()
         }
     }
 }

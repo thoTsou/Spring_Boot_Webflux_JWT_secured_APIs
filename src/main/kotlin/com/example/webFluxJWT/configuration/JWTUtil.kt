@@ -34,7 +34,7 @@ class JWTUtil(
         return doGenerateToken(claims,user.username)
     }
 
-    suspend fun validateToken(token: String) =
+    suspend fun hasTokenExpired(token: String) =
         !isTokenExpired(token)
 
     private suspend fun doGenerateToken(claims: Map<String,Any>, username: String): String{
