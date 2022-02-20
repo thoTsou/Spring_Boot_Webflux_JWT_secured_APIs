@@ -25,32 +25,43 @@ class JWTUtil(
     suspend fun isTokenExpired(token: String): Boolean =
         getExpirationDateFromToken(token).before(Date())
 
-    suspend fun generateToken(user: User): String {
+    suspend fun generateTokens(user: User): Map<String,String> {
 
         val claims: HashMap<String,Any> = hashMapOf()
 
         claims["rolesANDprivileges"] = user.rolesANDprivileges
 
-        return doGenerateToken(claims,user.username)
+        return doGenerateTokens(claims,user.username)
     }
 
     suspend fun hasTokenExpired(token: String) =
         !isTokenExpired(token)
 
-    private suspend fun doGenerateToken(claims: Map<String,Any>, username: String): String{
+    private suspend fun doGenerateTokens(claims: Map<String,Any>, username: String): Map<String,String> {
         val expTime: Long = 28800 //in second
         val createdDate = Date()
-        val expDAte = Date(createdDate.time + expTime * 1000)
+
+        val access_token_expDAte = Date(createdDate.time + expTime * 1000)
 
         val access_token = Jwts.builder()
             .setClaims(claims)
             .setSubject(username)
             .setIssuedAt(createdDate)
-            .setExpiration(expDAte)
+            .setExpiration(access_token_expDAte)
             .signWith(secretKey)
             .compact()
 
-        return access_token
+        val refresh_token_expDAte = Date(createdDate.time + expTime * 2000)
+
+        val refresh_token = Jwts.builder()
+            .setClaims(claims)
+            .setSubject(username)
+            .setIssuedAt(createdDate)
+            .setExpiration(refresh_token_expDAte)
+            .signWith(secretKey)
+            .compact()
+
+        return mapOf("access_token" to access_token,"refresh_token" to refresh_token)
     }
 
 }

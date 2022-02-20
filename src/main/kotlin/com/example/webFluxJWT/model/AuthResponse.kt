@@ -4,6 +4,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 
 data class AuthResponse(
-    @JsonProperty("token")
-    val token: String,
+    val tokens: Map<String,String>,
 )

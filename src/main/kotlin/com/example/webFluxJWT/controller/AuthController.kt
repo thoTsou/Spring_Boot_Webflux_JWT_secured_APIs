@@ -21,7 +21,7 @@ class AuthController(
 ) {
 
     @PostMapping("/login")
-    suspend fun login(@RequestBody authRequest: AuthRequest): ResponseEntity<AuthResponse> {
+    suspend fun login(@RequestBody authRequest: AuthRequest): ResponseEntity<Any> {
 
         val user = userService.findUserByUsername(authRequest.username)
 
@@ -32,9 +32,9 @@ class AuthController(
             if (!doubleCheckPassword)
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
             else
-                ResponseEntity.ok(AuthResponse(jwtUtil.generateToken(user)))
+                ResponseEntity.ok(AuthResponse(jwtUtil.generateTokens(user)))
         }else{
-            ResponseEntity.badRequest().body(AuthResponse("username and/or password not specified"))
+            ResponseEntity.badRequest().body("username and/or password not specified")
         }
     }
 
