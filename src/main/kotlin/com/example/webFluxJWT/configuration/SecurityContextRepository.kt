@@ -1,7 +1,7 @@
 package com.example.webFluxJWT.configuration
 
 
-import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
@@ -30,11 +30,12 @@ class SecurityContextRepository(
             val authToken = authTokenWithBearerPrefix.substring(7)
             val auth = UsernamePasswordAuthenticationToken(authToken, authToken)
 
-            return@mono authenticationManager.authenticate(auth).map { SecurityContextImpl(it) }.awaitSingle()
+            // try to authenticate client's handed Bearer token
+            return@mono authenticationManager.authenticate(auth).map { SecurityContextImpl(it) }.awaitSingleOrNull()
         }else{
-            //return dum SecurityContext because AUTHORIZATION HEADER is not specified
-            val dumAuth = UsernamePasswordAuthenticationToken("AUTH_header", "not_specified")
-            return@mono authenticationManager.authenticate(dumAuth).map { SecurityContextImpl(it) }.awaitSingle()
+            // AUTHORIZATION HEADER is not specified
+            // API will respond with 401:Unauthorized
+            return@mono null
         }
     }
 }

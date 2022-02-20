@@ -15,10 +15,8 @@ class AuthenticationManager(
 ): ReactiveAuthenticationManager {
 
     override fun authenticate(authentication: Authentication): Mono<Authentication> = mono {
-
-        // if AUTHORIZATION header is not specified OR Bearer token is invalid for some reason
-        // jwtUtil.getUsernameFromToken(authToken)
-        // will throw an exception
+        // if client's handed Bearer token is invalid for some reason
+        // jwtUtil.getUsernameFromToken(authToken), will throw an exception
         runCatching {
             val authToken = authentication.credentials.toString()
             val username = jwtUtil.getUsernameFromToken(authToken)
@@ -39,13 +37,9 @@ class AuthenticationManager(
                 throw Exception("token has expired, so we have to somehow tell client to refresh it")
             }
         }.getOrElse {
-            // return dum Authentication as AUTHORIZATION header is not specified OR Bearer token is invalid for some reason
-            // we do this in order for the API to respond with 403:Forbidden
-            return@mono UsernamePasswordAuthenticationToken(
-                "this_is",
-                null,
-                listOf("not_valid").map { SimpleGrantedAuthority(it) }
-            )
+            // not a valid JWT
+            // API will respond will 401:Unauthorized
+            return@mono null
         }
     }
 }
