@@ -31,6 +31,7 @@ class WebSecurityConfig(
             .csrf().disable()
             .formLogin().disable()
             .httpBasic().disable()
+            .logout().disable()
             // XSS protection header (1; mode=block) is added by default
             // BUT we should also
             // use Content Security Policy to overcome XSS
