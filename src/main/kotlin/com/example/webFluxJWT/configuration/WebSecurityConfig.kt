@@ -28,6 +28,8 @@ class WebSecurityConfig(
             // no need for csrf token as this API in not vulnerable to cross site request forgery
             // BECAUSE
             // client MUST hand its API key (JWT) via AUTHORIZATION header
+            // CSRF token is needed if client is a web browser AND
+            // hands in its API key (JWT) to the backend, via cookies
             .csrf().disable()
             .formLogin().disable()
             .httpBasic().disable()
@@ -41,7 +43,7 @@ class WebSecurityConfig(
             .securityContextRepository(securityContextRepository)
             .authorizeExchange()
             .pathMatchers(HttpMethod.OPTIONS).permitAll()
-            .pathMatchers("/login").permitAll()
+            .pathMatchers("/login","/refresh").permitAll()
             .anyExchange().authenticated()
             .and().build();
 
