@@ -25,9 +25,17 @@ class WebSecurityConfig(
             }.accessDeniedHandler { exchange, _ ->
                 Mono.fromRunnable{ exchange.response.statusCode = HttpStatus.FORBIDDEN }
             }.and()
+            // no need for csrf token as this API in not vulnerable to cross site request forgery
+            // BECAUSE
+            // client MUST hand its API key (JWT) via AUTHORIZATION header
             .csrf().disable()
             .formLogin().disable()
             .httpBasic().disable()
+            // XSS protection header (1; mode=block) is added by default
+            // BUT we should also
+            // use Content Security Policy to overcome XSS
+            .headers().contentSecurityPolicy("script-src 'self'").and()
+            .and()
             .authenticationManager(authenticationManager)
             .securityContextRepository(securityContextRepository)
             .authorizeExchange()
