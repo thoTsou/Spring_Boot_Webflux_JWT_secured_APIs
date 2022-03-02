@@ -22,7 +22,7 @@ class AuthenticationManager(
             val username = jwtUtil.getUsernameFromToken(authToken)
 
             // token is a valid JWT BUT it might have expired
-            if (jwtUtil.hasTokenExpired(authToken)) {
+            if (jwtUtil.hasTokenNotExpired(authToken)) {
 
                 val claims = jwtUtil.getAllClaimsFromToken(authToken)
                 val rolesANDprivilagesList = claims["rolesANDprivileges"] as List<String>
