@@ -1,4 +1,4 @@
-# WebFlux+Kotlin+coroutines JWT secured API template
+# WebFlux+Kotlin+coroutines JWT secured APIs
 
 - This project could be taken under consideration when setting up reactive(webflux) API stateless security based on JWTs.
 
